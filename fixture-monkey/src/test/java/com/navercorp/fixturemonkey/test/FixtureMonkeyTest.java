@@ -1458,7 +1458,7 @@ class FixtureMonkeyTest {
 	}
 
 	@Property
-	void giveMeBuilderCachedReturnsDiff() {
+	void giveMeBuilderReturnsDiff() {
 		// given
 		Arbitrary<ComplexClass> sut = this.sut.giveMeBuilder(ComplexClass.class)
 			.build();
@@ -1471,18 +1471,17 @@ class FixtureMonkeyTest {
 	}
 
 	@Property
-	void giveMeBuilderFixedCachedReturnsDiff() {
+	void giveMeBuilderFixedCachedReturnsSame() {
 		// given
 		Arbitrary<ComplexClass> sut = this.sut.giveMeBuilder(ComplexClass.class)
-			.apply((it, builder) -> {
-			})
+			.fixed()
 			.build();
 
 		// when
 		ComplexClass actual1 = sut.sample();
 		ComplexClass actual2 = sut.sample();
 
-		then(actual1).isNotEqualTo(actual2);
+		then(actual1).isEqualTo(actual2);
 	}
 
 	@Data

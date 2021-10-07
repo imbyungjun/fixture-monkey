@@ -65,4 +65,8 @@ public class LazyValue<T> {
 			this.value = null;
 		}
 	}
+
+	public boolean isFixed() {
+		return this.fixed;
+	}
 }

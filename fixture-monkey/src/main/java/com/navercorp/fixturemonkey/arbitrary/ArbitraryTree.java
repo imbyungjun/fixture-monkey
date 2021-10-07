@@ -139,6 +139,10 @@ public final class ArbitraryTree<T> {
 		);
 	}
 
+	public boolean isFixed() {
+		return this.head.getValue() != null && this.head.getValue().isFixed();
+	}
+
 	@SuppressWarnings("unchecked")
 	public Class<T> getClazz() {
 		return (Class<T>)head.getType().getType();

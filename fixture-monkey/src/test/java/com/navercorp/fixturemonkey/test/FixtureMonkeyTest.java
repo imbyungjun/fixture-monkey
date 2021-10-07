@@ -1484,6 +1484,19 @@ class FixtureMonkeyTest {
 		then(actual1).isEqualTo(actual2);
 	}
 
+	@Property
+	void giveMeBuilderFixedWithoutBuildCachedReturnsSame() {
+		// given
+		ArbitraryBuilder<ComplexClass> sut = this.sut.giveMeBuilder(ComplexClass.class)
+ 			.fixed();
+
+		// when
+		ComplexClass actual1 = sut.sample();
+		ComplexClass actual2 = sut.sample();
+
+		then(actual1).isEqualTo(actual2);
+	}
+
 	@Data
 	public static class IntegerWrapperClass {
 		int value;

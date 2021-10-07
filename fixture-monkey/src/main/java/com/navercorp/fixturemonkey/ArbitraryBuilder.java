@@ -40,6 +40,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
+import net.jqwik.api.Arbitraries;
 import net.jqwik.api.Arbitrary;
 import net.jqwik.api.Combinators.F3;
 import net.jqwik.api.Combinators.F4;
@@ -79,6 +80,7 @@ public final class ArbitraryBuilder<T> {
 	private ArbitraryGenerator generator;
 	private ArbitraryCustomizers arbitraryCustomizers;
 	private boolean validOnly = true;
+	private T lastSampled = null;
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	ArbitraryBuilder(
@@ -173,15 +175,8 @@ public final class ArbitraryBuilder<T> {
 	}
 
 	public Arbitrary<T> build() {
-
 		ArbitraryBuilder<T> buildArbitraryBuilder = this.copy();
 		return buildArbitraryBuilder.tree.result(() -> {
-			if (!buildArbitraryBuilder.isDirty() &&
-				buildArbitraryBuilder.tree.getArbitrary() != null &&
-				buildArbitraryBuilder.tree.isFixed()
-			) { // not build if not changed
-				return buildArbitraryBuilder.tree.getArbitrary();
-			}
 			ArbitraryTree<T> buildTree = buildArbitraryBuilder.tree;
 
 			buildArbitraryBuilder.traverser.traverse(
@@ -199,7 +194,10 @@ public final class ArbitraryBuilder<T> {
 	}
 
 	public T sample() {
-		return this.build().sample();
+		if (!this.tree.isFixed() || lastSampled == null) {
+			lastSampled = this.build().sample();
+		}
+		return lastSampled;
 	}
 
 	private T sampleInternal() {
@@ -553,6 +551,7 @@ public final class ArbitraryBuilder<T> {
 			this.generatorMap
 		);
 		copied.validOnly(this.validOnly);
+		copied.lastSampled = lastSampled;
 		return copied;
 	}
 

@@ -70,7 +70,7 @@ import com.navercorp.fixturemonkey.validator.ArbitraryValidator;
 public final class ArbitraryBuilder<T> {
 	private final ArbitraryTree<T> tree;
 	private final ArbitraryTraverser traverser;
-	private final List<BuilderManipulator> builderManipulators;
+	private final DecoratedList<BuilderManipulator> builderManipulators;
 	private final List<BuilderManipulator> usedManipulators;
 	@SuppressWarnings("rawtypes")
 	private final ArbitraryValidator validator;
@@ -87,7 +87,8 @@ public final class ArbitraryBuilder<T> {
 		ArbitraryGenerator generator,
 		ArbitraryValidator validator,
 		ArbitraryCustomizers arbitraryCustomizers,
-		Map<Class<?>, ArbitraryGenerator> generatorMap
+		Map<Class<?>, ArbitraryGenerator> generatorMap,
+		Consumer<BuilderManipulator> onManipulated
 	) {
 		this(
 			new ArbitraryTree<>(
@@ -100,7 +101,7 @@ public final class ArbitraryBuilder<T> {
 			generator,
 			validator,
 			arbitraryCustomizers,
-			new ArrayList<>(),
+			new CallbackList<>(new DefaultDecoratedList<>(), onManipulated),
 			new ArrayList<>(),
 			new ArrayList<>(),
 			generatorMap
@@ -114,7 +115,8 @@ public final class ArbitraryBuilder<T> {
 		ArbitraryGenerator generator,
 		ArbitraryValidator validator,
 		ArbitraryCustomizers arbitraryCustomizers,
-		Map<Class<?>, ArbitraryGenerator> generatorMap
+		Map<Class<?>, ArbitraryGenerator> generatorMap,
+		Consumer<BuilderManipulator> onManipulated
 	) {
 		this(
 			new ArbitraryTree<>(
@@ -127,7 +129,7 @@ public final class ArbitraryBuilder<T> {
 			generator,
 			validator,
 			arbitraryCustomizers,
-			new ArrayList<>(),
+			new CallbackList<>(new DefaultDecoratedList<>(), onManipulated),
 			new ArrayList<>(),
 			new ArrayList<>(),
 			generatorMap
@@ -141,7 +143,7 @@ public final class ArbitraryBuilder<T> {
 		ArbitraryGenerator generator,
 		ArbitraryValidator validator,
 		ArbitraryCustomizers arbitraryCustomizers,
-		List<BuilderManipulator> builderManipulators,
+		DecoratedList<BuilderManipulator> builderManipulators,
 		List<BuilderManipulator> usedManipulators,
 		List<BiConsumer<T, ArbitraryBuilder<T>>> decomposedManipulators,
 		Map<Class<?>, ArbitraryGenerator> generatorMap
@@ -151,8 +153,8 @@ public final class ArbitraryBuilder<T> {
 		this.generator = getGenerator(generator, arbitraryCustomizers);
 		this.validator = validator;
 		this.arbitraryCustomizers = arbitraryCustomizers;
-		this.builderManipulators = new ArrayList<>(builderManipulators);
-		this.usedManipulators = new ArrayList<>(usedManipulators);
+		this.builderManipulators = builderManipulators;
+		this.usedManipulators = usedManipulators;
 		this.decomposedManipulators = decomposedManipulators;
 		this.generatorMap = generatorMap.entrySet().stream()
 			.map(it -> new SimpleEntry<Class<?>, ArbitraryGenerator>(
@@ -352,7 +354,9 @@ public final class ArbitraryBuilder<T> {
 			this.generator,
 			this.validator,
 			this.arbitraryCustomizers,
-			this.generatorMap
+			this.generatorMap,
+			(manipulator) -> {
+			}
 		);
 	}
 
@@ -365,7 +369,9 @@ public final class ArbitraryBuilder<T> {
 			this.generator,
 			this.validator,
 			this.arbitraryCustomizers,
-			this.generatorMap
+			this.generatorMap,
+			(manipulator) -> {
+			}
 		);
 	}
 
@@ -383,7 +389,10 @@ public final class ArbitraryBuilder<T> {
 			this.generator,
 			this.validator,
 			this.arbitraryCustomizers,
-			this.generatorMap);
+			this.generatorMap,
+			(manipulator) -> {
+			}
+		);
 	}
 
 	public <U, V, W, R> ArbitraryBuilder<R> zipWith(
@@ -402,7 +411,10 @@ public final class ArbitraryBuilder<T> {
 			this.generator,
 			this.validator,
 			this.arbitraryCustomizers,
-			this.generatorMap);
+			this.generatorMap,
+			(manipulator) -> {
+			}
+		);
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
@@ -422,7 +434,9 @@ public final class ArbitraryBuilder<T> {
 			this.generator,
 			this.validator,
 			this.arbitraryCustomizers,
-			this.generatorMap
+			this.generatorMap,
+			(manipulator) -> {
+			}
 		);
 	}
 
@@ -540,7 +554,7 @@ public final class ArbitraryBuilder<T> {
 			this.generator,
 			this.validator,
 			this.arbitraryCustomizers,
-			this.builderManipulators.stream().map(BuilderManipulator::copy).collect(toList()),
+			this.builderManipulators.copy(),
 			this.usedManipulators.stream().map(BuilderManipulator::copy).collect(toList()),
 			new ArrayList<>(this.decomposedManipulators),
 			this.generatorMap
